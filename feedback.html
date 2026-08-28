@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share Your Feedback ☕🍮</title>
+<script src="config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --cream:#FBF5EA;
+    --paper:#FFFDF8;
+    --line:#E7DAC2;
+    --coffee-dark:#3A2820;
+    --coffee:#6F4A32;
+    --coffee-soft:#9C7A5C;
+    --caramel:#B8813C;
+    --caramel-light:#F1DDB8;
+    --clay:#BD6B4A;
+    --clay-bg:#F5E1D6;
+    --shadow: 0 2px 10px rgba(58,40,32,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0;
+    background: var(--cream);
+    color: var(--coffee-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height:100vh;
+  }
+  .wrap{ max-width: 480px; margin: 0 auto; padding: 28px 18px 60px 18px; }
+  .header{ text-align:center; margin-bottom: 18px; }
+  .header .emoji{ font-size: 2.2rem; }
+  h1{ font-family: Georgia, serif; font-size:1.4rem; margin: 6px 0 4px 0; }
+  .sub{ color: var(--coffee-soft); font-size:0.9rem; }
+  .card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+  label{ display:block; font-size:0.8rem; font-weight:700; color:var(--coffee-soft); margin: 16px 0 6px 0; }
+  label:first-of-type{ margin-top:0; }
+  input, select, textarea{
+    width:100%;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-size: 0.95rem;
+    color: var(--coffee-dark);
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color: var(--caramel);
+    box-shadow: 0 0 0 3px var(--caramel-light);
+  }
+  textarea{ resize:vertical; min-height:60px; }
+  .star-select{ display:flex; gap:6px; }
+  .star-select button{
+    background:none; border:1.5px solid var(--line); border-radius:8px;
+    flex:1; height:42px; font-size:1rem; cursor:pointer; color: var(--coffee-soft);
+  }
+  .star-select button.active{ background: var(--caramel); color:#fff; border-color:var(--caramel); }
+  .btn{
+    border:none; cursor:pointer;
+    padding: 13px 16px;
+    border-radius: 999px;
+    font-size:0.95rem;
+    font-weight:700;
+    width:100%;
+    margin-top:20px;
+  }
+  .btn-primary{ background: var(--coffee-dark); color: var(--cream); }
+  .btn-primary:active{ transform: scale(0.98); }
+  .btn-primary[disabled]{ opacity:0.6; }
+  .error{ color: var(--clay); background: var(--clay-bg); padding:10px 12px; border-radius: var(--radius-sm); font-size:0.85rem; margin-top:14px; display:none; }
+  .thankyou{ text-align:center; padding: 40px 10px; }
+  .thankyou .emoji{ font-size:3rem; }
+  .offline-note{
+    margin-top:16px; font-size:0.78rem; color:var(--coffee-soft); text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="emoji">☕🍮</div>
+    <h1 id="bizName">We'd love your feedback!</h1>
+    <p class="sub">It only takes a minute — thank you for trying our Coffee Jelly.</p>
+  </div>
+
+  <div class="card" id="formCard">
+    <label>Your name (optional)</label>
+    <input type="text" id="fbName" placeholder="Juana Dela Cruz">
+
+    <label>Taste — how did it taste?</label>
+    <div class="star-select" data-field="taste"></div>
+
+    <label>Sweetness — was it too sweet, too little, or just right?</label>
+    <div class="star-select" data-field="sweetness"></div>
+
+    <label>Texture — how was the jelly texture?</label>
+    <div class="star-select" data-field="texture"></div>
+
+    <label>Would you buy again?</label>
+    <select id="fbBuyAgain"><option>Yes</option><option>Maybe</option><option>No</option></select>
+
+    <label>What did you like?</label>
+    <textarea id="fbLiked" placeholder="Optional"></textarea>
+
+    <label>What should we improve?</label>
+    <textarea id="fbImprove" placeholder="Optional"></textarea>
+
+    <label>Anything else you'd like to add?</label>
+    <textarea id="fbComments" placeholder="Optional"></textarea>
+
+    <div class="error" id="errorMsg"></div>
+    <button class="btn btn-primary" id="btnSubmit">Submit Feedback</button>
+    <p class="offline-note" id="offlineNote"></p>
+  </div>
+
+  <div class="card thankyou" id="thankYouCard" style="display:none;">
+    <div class="emoji">🙏</div>
+    <h1>Thank you!</h1>
+    <p class="sub">Your feedback helps us make better Coffee Jelly every week.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var ratings = {taste:0, sweetness:0, texture:0};
+
+  document.querySelectorAll('.star-select').forEach(function(wrap){
+    var field = wrap.dataset.field;
+    for(var i=1;i<=5;i++){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = i;
+      b.dataset.val = i;
+      b.addEventListener('click', function(){
+        ratings[field] = Number(this.dataset.val);
+        var buttons = wrap.querySelectorAll('button');
+        buttons.forEach(function(x){ x.classList.remove('active'); });
+        buttons.forEach(function(x){ if(Number(x.dataset.val) <= ratings[field]) x.classList.add('active'); });
+      });
+      wrap.appendChild(b);
+    }
+  });
+
+  var firebaseReady = false;
+  try{
+    var cfg = window.FIREBASE_CONFIG;
+    if(cfg && cfg.apiKey && cfg.apiKey.indexOf('YOUR_') !== 0 && typeof firebase !== 'undefined'){
+      firebase.initializeApp(cfg);
+      window.__db = firebase.firestore();
+      firebaseReady = true;
+    }
+  }catch(e){ console.error(e); }
+
+  if(!firebaseReady){
+    document.getElementById('offlineNote').textContent = 'Note to shop owner: this page isn\u2019t connected yet — see SETUP-GUIDE.md to enable auto-sync.';
+  }
+
+  function isoDate(d){
+    var y=d.getFullYear(), m=(''+(d.getMonth()+1)).padStart(2,'0'), day=(''+d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+
+  document.getElementById('btnSubmit').addEventListener('click', function(){
+    var errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+    if(!ratings.taste || !ratings.sweetness || !ratings.texture){
+      errEl.textContent = 'Please rate taste, sweetness, and texture before submitting.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if(!firebaseReady){
+      errEl.textContent = 'This feedback form isn\u2019t connected yet. Please let the shop know, or try again later.';
+      errEl.style.display = 'block';
+      return;
+    }
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    var entry = {
+      name: document.getElementById('fbName').value.trim(),
+      taste: ratings.taste,
+      sweetness: ratings.sweetness,
+      texture: ratings.texture,
+      buyAgain: document.getElementById('fbBuyAgain').value,
+      liked: document.getElementById('fbLiked').value.trim(),
+      improve: document.getElementById('fbImprove').value.trim(),
+      comments: document.getElementById('fbComments').value.trim(),
+      date: isoDate(new Date()),
+      submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    window.__db.collection('feedback').add(entry).then(function(){
+      document.getElementById('formCard').style.display = 'none';
+      document.getElementById('thankYouCard').style.display = 'block';
+    }).catch(function(err){
+      console.error(err);
+      errEl.textContent = 'Something went wrong sending your feedback. Please check your connection and try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Submit Feedback';
+    });
+  });
+})();
+</script>
+</body>
+</html>
