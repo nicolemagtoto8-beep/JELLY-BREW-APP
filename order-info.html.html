@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Coffee Jelly Again ☕🍮</title>
+<style>
+  :root{
+    --cream:#FBF5EA;
+    --paper:#FFFDF8;
+    --line:#E7DAC2;
+    --coffee-dark:#3A2820;
+    --coffee:#6F4A32;
+    --coffee-soft:#9C7A5C;
+    --caramel:#B8813C;
+    --caramel-light:#F1DDB8;
+    --sage:#6E8B5A;
+    --sage-bg:#E7EFDE;
+    --shadow: 0 2px 10px rgba(58,40,32,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0;
+    background: var(--cream);
+    color: var(--coffee-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height:100vh;
+  }
+  .wrap{ max-width: 480px; margin: 0 auto; padding: 28px 18px 60px 18px; }
+  .header{ text-align:center; margin-bottom: 18px; }
+  .header .emoji{ font-size: 2.2rem; }
+  h1{ font-family: Georgia, serif; font-size:1.5rem; margin: 6px 0 4px 0; }
+  h2{ font-family: Georgia, serif; font-size:1.1rem; margin: 0 0 10px 0; }
+  .sub{ color: var(--coffee-soft); font-size:0.9rem; }
+  .card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  table{ width:100%; border-collapse:collapse; }
+  td{ padding:10px 0; border-bottom:1px dashed var(--line); font-size:0.95rem; }
+  td:last-child{ text-align:right; font-weight:700; color:var(--coffee); }
+  tr:last-child td{ border-bottom:none; }
+  .badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .badge{
+    background: var(--caramel-light);
+    color: var(--coffee-dark);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size:0.85rem;
+    font-weight:600;
+  }
+  .contact-btn{
+    display:flex; align-items:center; gap:10px;
+    background: var(--coffee-dark);
+    color: var(--cream);
+    text-decoration:none;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-weight:700;
+    font-size:0.95rem;
+    margin-bottom:10px;
+  }
+  .contact-btn.messenger{ background: var(--coffee); }
+  .contact-btn:last-child{ margin-bottom:0; }
+  .contact-btn .icon{ font-size:1.2rem; }
+  .note{ font-size:0.8rem; color:var(--coffee-soft); margin-top:10px; }
+  label{ display:block; font-size:0.8rem; font-weight:700; color:var(--coffee-soft); margin: 14px 0 6px 0; }
+  label:first-of-type{ margin-top:0; }
+  input, select, textarea{
+    width:100%;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-size: 0.92rem;
+    color: var(--coffee-dark);
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color: var(--caramel);
+    box-shadow: 0 0 0 3px var(--caramel-light);
+  }
+  textarea{ resize:vertical; min-height:56px; }
+  .btn-copy{
+    width:100%;
+    border:none; cursor:pointer;
+    background: var(--caramel);
+    color:#fff;
+    padding: 13px 16px;
+    border-radius: 999px;
+    font-size:0.95rem;
+    font-weight:700;
+    margin-top:18px;
+  }
+  .btn-copy:active{ transform: scale(0.98); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="emoji">☕🍮</div>
+    <!-- EDIT HERE: your business name -->
+    <h1>Coffee Jelly Co.</h1>
+    <p class="sub">Want another cup? Here's our menu and how to order.</p>
+  </div>
+
+  <div class="card">
+    <h2>Price List</h2>
+    <table id="priceListTable"></table>
+  </div>
+
+  <div class="card">
+    <h2>Build Your Order</h2>
+    <p class="sub" style="margin-bottom:14px;">Add each size you want, then fill in your details and copy your order.</p>
+
+    <label>Cup size</label>
+    <select id="itemSize"></select>
+
+    <label>Quantity</label>
+    <input type="number" id="itemQty" min="1" value="1">
+
+    <button class="btn-copy" id="btnAddItem" style="background:var(--coffee); margin-top:14px;">➕ Add to Order</button>
+
+    <div id="cartList" style="margin-top:16px;"></div>
+    <div id="cartTotal" style="display:none; margin-top:6px; text-align:right; font-weight:700; color:var(--coffee-dark);"></div>
+  </div>
+
+  <div class="card">
+    <h2>Your Details</h2>
+
+    <label>Your name</label>
+    <input type="text" id="custName" placeholder="Juana Dela Cruz">
+
+    <label>Contact number</label>
+    <input type="text" id="custContact" placeholder="09xx xxx xxxx">
+
+    <label>Payment method</label>
+    <select id="custPayment">
+      <option>Online Payment</option>
+      <option>COD</option>
+    </select>
+
+    <label>Pickup or delivery?</label>
+    <select id="custFulfillment">
+      <option>Pickup</option>
+      <option>Delivery</option>
+    </select>
+
+    <label>Delivery address / notes (optional)</label>
+    <textarea id="custNotes" placeholder="Address, landmark, preferred time, etc."></textarea>
+
+    <button class="btn-copy" id="btnCopyOrder">📋 Copy My Order</button>
+    <p class="note" id="copyConfirm" style="display:none; color:var(--sage); font-weight:600;">Copied! Now paste it into your message below. ✅</p>
+    <p class="note" id="copyError" style="display:none; color:#BD6B4A; font-weight:600;">Please add at least one item to your order first.</p>
+  </div>
+
+  <div class="card">
+    <h2>Send Us Your Order</h2>
+    <!-- EDIT HERE: replace the phone number after "tel:" AND the -->
+    <!-- number shown in the text with your real number.          -->
+    <a class="contact-btn" href="tel:+639171234567">
+      <span class="icon">📞</span> Call or Text: 0917 123 4567
+    </a>
+    <!-- EDIT HERE: replace the link after href=" with your real   -->
+    <!-- Messenger link, e.g. https://m.me/yourpagename            -->
+    <a class="contact-btn messenger" href="https://m.me/yourpagename">
+      <span class="icon">💬</span> Message us on Messenger
+    </a>
+    <p class="note">Paste your copied order into your message so we have all the details.</p>
+  </div>
+</div>
+
+<style>
+  .cart-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 10px 0; border-bottom:1px dashed var(--line); font-size:0.9rem;
+  }
+  .cart-row:last-child{ border-bottom:none; }
+  .cart-row .remove-btn{
+    background:none; border:none; color:#BD6B4A; font-size:1rem; cursor:pointer; padding:0 4px;
+  }
+  .cart-empty{ color:var(--coffee-soft); font-size:0.85rem; text-align:center; padding:6px 0; }
+</style>
+
+<script>
+  // ===================================================== //
+  // EDIT HERE: this is your ONE place to manage the menu.  //
+  // It fills in BOTH the price list above and the size     //
+  // dropdown customers use to build their order.           //
+  // label = what customers see, price = number only.       //
+  // ===================================================== //
+  var MENU = [
+    { label: "Small (8 oz)", price: 50 },
+    { label: "Regular (12 oz)", price: 65 },
+    { label: "Large (16 oz)", price: 80 }
+  ];
+  // ===================== end edit area ===================== //
+
+  var cart = []; // {label, price, qty}
+
+  function formatMoney(n){ return '₱' + Number(n).toLocaleString(undefined, {minimumFractionDigits:0}); }
+
+  function renderPriceList(){
+    var table = document.getElementById('priceListTable');
+    table.innerHTML = MENU.map(function(item){
+      return '<tr><td>'+item.label+'</td><td>'+formatMoney(item.price)+'</td></tr>';
+    }).join('');
+  }
+
+  function renderSizeDropdown(){
+    var sel = document.getElementById('itemSize');
+    sel.innerHTML = MENU.map(function(item, i){
+      return '<option value="'+i+'">'+item.label+' — '+formatMoney(item.price)+'</option>';
+    }).join('');
+  }
+
+  function renderCart(){
+    var list = document.getElementById('cartList');
+    var totalEl = document.getElementById('cartTotal');
+    if(cart.length === 0){
+      list.innerHTML = '<div class="cart-empty">No items added yet.</div>';
+      totalEl.style.display = 'none';
+      return;
+    }
+    var total = 0;
+    list.innerHTML = cart.map(function(item, i){
+      var subtotal = item.price * item.qty;
+      total += subtotal;
+      return '<div class="cart-row">' +
+        '<span>' + item.label + ' × ' + item.qty + '</span>' +
+        '<span>' + formatMoney(subtotal) + ' <button class="remove-btn" data-remove="'+i+'">✕</button></span>' +
+        '</div>';
+    }).join('');
+    totalEl.style.display = 'block';
+    totalEl.textContent = 'Total: ' + formatMoney(total);
+
+    list.querySelectorAll('[data-remove]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        cart.splice(Number(btn.dataset.remove), 1);
+        renderCart();
+      });
+    });
+  }
+
+  document.getElementById('btnAddItem').addEventListener('click', function(){
+    var idx = Number(document.getElementById('itemSize').value);
+    var qty = Number(document.getElementById('itemQty').value) || 1;
+    var menuItem = MENU[idx];
+    var existing = cart.find(function(c){ return c.label === menuItem.label; });
+    if(existing){
+      existing.qty += qty;
+    } else {
+      cart.push({ label: menuItem.label, price: menuItem.price, qty: qty });
+    }
+    document.getElementById('itemQty').value = 1;
+    renderCart();
+  });
+
+  document.getElementById('btnCopyOrder').addEventListener('click', function(){
+    var errEl = document.getElementById('copyError');
+    var confirmEl = document.getElementById('copyConfirm');
+    errEl.style.display = 'none';
+    confirmEl.style.display = 'none';
+
+    if(cart.length === 0){
+      errEl.style.display = 'block';
+      return;
+    }
+
+    var total = cart.reduce(function(s,c){ return s + c.price*c.qty; }, 0);
+    var itemLines = cart.map(function(c){
+      return '- ' + c.label + ' × ' + c.qty + ' = ' + formatMoney(c.price*c.qty);
+    }).join('\n');
+
+    var text =
+      "☕ Coffee Jelly Order\n" +
+      "Name: " + (document.getElementById('custName').value || '—') + "\n" +
+      "Contact: " + (document.getElementById('custContact').value || '—') + "\n\n" +
+      "Items:\n" + itemLines + "\n" +
+      "Total: " + formatMoney(total) + "\n\n" +
+      "Payment: " + document.getElementById('custPayment').value + "\n" +
+      "Pickup/Delivery: " + document.getElementById('custFulfillment').value + "\n" +
+      "Notes: " + (document.getElementById('custNotes').value || '—');
+
+    function showConfirm(){
+      confirmEl.style.display = 'block';
+      setTimeout(function(){ confirmEl.style.display = 'none'; }, 3000);
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(showConfirm).catch(function(){
+        fallbackCopy(text, showConfirm);
+      });
+    } else {
+      fallbackCopy(text, showConfirm);
+    }
+
+    function fallbackCopy(str, cb){
+      var ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta);
+      cb();
+    }
+  });
+
+  renderPriceList();
+  renderSizeDropdown();
+  renderCart();
+</script>
+</body>
+</html>
