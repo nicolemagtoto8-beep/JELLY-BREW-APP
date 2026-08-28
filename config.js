@@ -1,20 +1,21 @@
-// ============================================================
-// Firebase configuration — this is what connects your QR code
-// feedback form to your dashboard automatically.
-//
-// This file is already filled in with your real project values
-// (coffee-jelly-c9820). You don't need to edit anything below.
-//
-// Just make sure this file stays in the same folder as
-// index.html and feedback.html, both on your computer and
-// wherever you upload/host them.
-// ============================================================
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDjt6Wk1eq5b_2_S47UzfOXVUd-Fto2dLo",
-  authDomain: "coffee-jelly-c9820.firebaseapp.com",
-  projectId: "coffee-jelly-c9820",
-  storageBucket: "coffee-jelly-c9820.firebasestorage.app",
-  messagingSenderId: "819292135105",
-  appId: "1:819292135105:web:667443bd0566347a75be40"
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBc4H-7-HA-fTHTFHJPir3YYmtbzOrzoLg",
+  authDomain: "coffee-jelly-orders.firebaseapp.com",
+  projectId: "coffee-jelly-orders",
+  storageBucket: "coffee-jelly-orders.firebasestorage.app",
+  messagingSenderId: "931814669127",
+  appId: "1:931814669127:web:aa9353c460a8597898aa62",
+  measurementId: "G-27W7MP76SC"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);

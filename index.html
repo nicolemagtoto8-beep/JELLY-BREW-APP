@@ -476,6 +476,8 @@
       <button class="btn btn-accent" id="btnAddOrder">＋ Add Order</button>
     </div>
 
+    <div class="card" id="ordersSyncBanner" style="padding:12px 16px;"></div>
+
     <div class="filter-row">
       <select id="filterWeek"></select>
       <select id="filterPayment">
@@ -819,6 +821,7 @@
         qrFeedbackLink: ""
       },
       orders: [],
+      importedCloudOrderIds: [],
       ingredients: [
         {id: uid(), name:"Coffee", qty:100, unit:"ml"},
         {id: uid(), name:"Milk", qty:50, unit:"ml"},
@@ -840,6 +843,7 @@
       var def = defaultState();
       parsed.settings = Object.assign({}, def.settings, parsed.settings || {});
       parsed.orders = parsed.orders || [];
+      parsed.importedCloudOrderIds = parsed.importedCloudOrderIds || [];
       parsed.ingredients = parsed.ingredients || def.ingredients;
       parsed.feedback = parsed.feedback || [];
       return parsed;
@@ -912,6 +916,7 @@
     if(btn) btn.classList.add('active');
     renderAll();
     if(name === 'feedback' && firebaseReady) loadCloudFeedback();
+    if(name === 'orders' && firebaseReady) loadCloudOrders();
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
@@ -1083,6 +1088,7 @@
   }
 
   function renderOrders(){
+    renderSyncBanners();
     renderOrdersFilterOptions();
     var weekFilter = document.getElementById('filterWeek').value || state.settings.currentDeliveryDate;
     var payFilter = document.getElementById('filterPayment').value;
@@ -1364,17 +1370,61 @@
     });
   }
 
+  /* ============ CLOUD ORDERS (auto-import from order-info.html) ============ */
+  function loadCloudOrders(){
+    if(!firebaseReady) return;
+    window.__db.collection('orders').orderBy('submittedAt','desc').limit(200).get().then(function(snap){
+      var imported = state.importedCloudOrderIds || [];
+      var newCount = 0;
+      snap.docs.forEach(function(doc){
+        if(imported.indexOf(doc.id) !== -1) return;
+        var d = doc.data();
+        var itemsSummary = (d.items || []).map(function(it){ return it.qty+'x '+it.label; }).join(', ');
+        var pricePerCup = d.totalCups > 0 ? (d.totalAmount / d.totalCups) : 0;
+        state.orders.push({
+          id: uid(),
+          name: d.name || 'Online customer',
+          contact: d.contact || '',
+          cups: d.totalCups || 0,
+          pricePerCup: pricePerCup,
+          total: d.totalAmount || 0,
+          paymentStatus: 'Pending',
+          fulfillment: d.fulfillment === 'Delivery' ? 'Delivery' : 'Pickup',
+          deliveryStatus: d.fulfillment === 'Delivery' ? 'For Delivery' : 'Pickup',
+          orderDate: isoDate(new Date()),
+          deliveryDate: state.settings.currentDeliveryDate,
+          notes: 'Online order (' + (d.paymentMethod || 'unspecified') + '). Items: ' + (itemsSummary || '—') + (d.notes ? '. ' + d.notes : '')
+        });
+        imported.push(doc.id);
+        newCount++;
+      });
+      if(newCount > 0){
+        state.importedCloudOrderIds = imported;
+        save();
+        renderAll();
+        showToast(newCount + ' new online order' + (newCount>1?'s':'') + ' added to your Orders tab!');
+      }
+    }).catch(function(err){
+      console.error('Could not load cloud orders:', err);
+    });
+  }
+
   function renderSyncBanners(){
     var qrBanner = document.getElementById('syncStatusCard');
     var fbBanner = document.getElementById('feedbackSyncBanner');
+    var ordersBanner = document.getElementById('ordersSyncBanner');
     if(firebaseReady){
       var html = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🟢</span><div><strong>Auto-sync is connected.</strong><br><span style="color:var(--coffee-soft);font-size:0.85rem;">Feedback submitted through your QR code lands here automatically.</span></div></div>';
+      var ordersHtml = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🟢</span><div><strong>Auto-sync is connected.</strong><br><span style="color:var(--coffee-soft);font-size:0.85rem;">Orders placed through your Order Again QR code are added here automatically, tagged to this week\u2019s batch.</span></div></div>';
       if(qrBanner) qrBanner.innerHTML = html;
       if(fbBanner) fbBanner.innerHTML = html;
+      if(ordersBanner) ordersBanner.innerHTML = ordersHtml;
     } else {
       var html2 = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🟡</span><div><strong>Auto-sync isn\u2019t set up yet.</strong><br><span style="color:var(--coffee-soft);font-size:0.85rem;">Feedback you add manually is saved on this device only. Follow the SETUP-GUIDE that came with this app to connect your QR code — it takes about 10 minutes and is free.</span></div></div>';
+      var ordersHtml2 = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🟡</span><div><strong>Auto-sync isn\u2019t set up yet.</strong><br><span style="color:var(--coffee-soft);font-size:0.85rem;">Online orders won\u2019t appear here until auto-sync is connected — see the SETUP-GUIDE.</span></div></div>';
       if(qrBanner) qrBanner.innerHTML = html2;
       if(fbBanner) fbBanner.innerHTML = html2;
+      if(ordersBanner) ordersBanner.innerHTML = ordersHtml2;
     }
   }
 
@@ -1660,6 +1710,7 @@
   /* ============ INIT ============ */
   switchView('dashboard');
   if(firebaseReady) loadCloudFeedback();
+  if(firebaseReady) loadCloudOrders();
   else renderSyncBanners();
 })();
 </script>
