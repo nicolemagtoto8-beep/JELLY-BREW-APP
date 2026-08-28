@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Jelly Weekly Manager</title>
+<style>
+  :root{
+    --cream:#FBF5EA;
+    --paper:#FFFDF8;
+    --line:#E7DAC2;
+    --coffee-dark:#3A2820;
+    --coffee:#6F4A32;
+    --coffee-soft:#9C7A5C;
+    --caramel:#B8813C;
+    --caramel-light:#F1DDB8;
+    --sage:#6E8B5A;
+    --sage-bg:#E7EFDE;
+    --clay:#BD6B4A;
+    --clay-bg:#F5E1D6;
+    --shadow: 0 2px 10px rgba(58,40,32,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+    font-size: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--cream);
+    color: var(--coffee-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom: 60px;
+  }
+  h1,h2,h3,h4{
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    color: var(--coffee-dark);
+    margin: 0 0 4px 0;
+    letter-spacing: 0.2px;
+  }
+  p{margin:0;}
+
+  /* ===== Header ===== */
+  .app-header{
+    background: linear-gradient(135deg, var(--coffee-dark), var(--coffee) 70%);
+    color: var(--cream);
+    padding: 22px 18px 60px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:180px; height:180px;
+    background: radial-gradient(circle, rgba(184,129,60,0.35), transparent 70%);
+    border-radius:50%;
+  }
+  .app-header .brand{
+    display:flex; align-items:center; gap:10px;
+    font-size:1.5rem;
+    position:relative; z-index:1;
+  }
+  .app-header .sub{
+    margin-top:4px;
+    font-size:0.88rem;
+    color: var(--caramel-light);
+    position:relative; z-index:1;
+  }
+  .header-meta{
+    margin-top:14px;
+    display:flex; gap:10px; flex-wrap:wrap;
+    position:relative; z-index:1;
+  }
+  .pill{
+    background: rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.25);
+    padding:6px 12px;
+    border-radius: 999px;
+    font-size:0.78rem;
+    display:flex; align-items:center; gap:6px;
+  }
+
+  /* ===== Nav Tabs ===== */
+  .tabs-wrap{
+    max-width: 920px;
+    margin: -40px auto 0 auto;
+    padding: 0 14px;
+    position:relative;
+    z-index:2;
+  }
+  .tabs{
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display:flex;
+    overflow-x:auto;
+    padding: 6px;
+    gap:4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .tab-btn{
+    flex: 0 0 auto;
+    background: transparent;
+    border: none;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--coffee-soft);
+    cursor:pointer;
+    white-space: nowrap;
+    display:flex; align-items:center; gap:6px;
+    transition: background .15s, color .15s;
+  }
+  .tab-btn:hover{ background: var(--caramel-light); }
+  .tab-btn.active{
+    background: var(--coffee-dark);
+    color: var(--cream);
+  }
+
+  .container{
+    max-width: 920px;
+    margin: 20px auto;
+    padding: 0 14px;
+  }
+  .view{ display:none; animation: fadein .2s ease; }
+  .view.active{ display:block; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .card h3{ font-size:1.05rem; margin-bottom:10px; }
+  .card-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+
+  .section-title{
+    font-size:1.3rem;
+    margin: 4px 0 14px 0;
+  }
+  .section-sub{
+    color: var(--coffee-soft);
+    font-size:0.85rem;
+    margin-bottom:16px;
+  }
+
+  /* ===== Dashboard hero ===== */
+  .hero-cup-card{
+    background: linear-gradient(160deg, var(--coffee-dark), var(--coffee));
+    color: var(--cream);
+    border-radius: var(--radius);
+    padding: 22px;
+    display:flex;
+    align-items:center;
+    gap: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .hero-cup-svg{ flex: 0 0 auto; }
+  .hero-text{ flex: 1 1 220px; }
+  .hero-number{
+    font-family: Georgia, serif;
+    font-size: 2.6rem;
+    line-height:1;
+    margin: 2px 0 6px 0;
+  }
+  .hero-label{
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--caramel-light);
+  }
+  .hero-msg{
+    margin-top:8px;
+    font-size: 0.92rem;
+    background: rgba(255,255,255,0.12);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    display:inline-block;
+  }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat-box{
+    background: var(--paper);
+    border:1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .stat-box .num{ font-size:1.5rem; font-weight:700; color:var(--coffee-dark); font-family:Georgia,serif;}
+  .stat-box .lbl{ font-size:0.74rem; color:var(--coffee-soft); text-transform:uppercase; letter-spacing:0.6px; margin-top:2px;}
+
+  /* Workflow stepper */
+  .stepper{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:4px;
+    overflow-x:auto;
+    padding: 6px 0 4px 0;
+  }
+  .step{
+    flex:1;
+    min-width:78px;
+    text-align:center;
+    position:relative;
+  }
+  .step .dot{
+    width:34px; height:34px;
+    border-radius:50%;
+    background: var(--caramel-light);
+    color: var(--coffee);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 6px auto;
+    font-size:1rem;
+    border: 2px solid var(--line);
+  }
+  .step.done .dot{ background: var(--sage); color:#fff; border-color: var(--sage);}
+  .step.current .dot{ background: var(--caramel); color:#fff; border-color:var(--caramel); box-shadow:0 0 0 4px var(--caramel-light);}
+  .step .lbl{ font-size:0.7rem; color:var(--coffee-soft); font-weight:600; }
+  .step::after{
+    content:"";
+    position:absolute;
+    top:17px; left:56%; right:-44%;
+    height:2px;
+    background: var(--line);
+    z-index:-1;
+  }
+  .step:last-child::after{ display:none; }
+  .step.done::after{ background: var(--sage); }
+
+  /* ===== Buttons ===== */
+  .btn{
+    border:none; cursor:pointer;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size:0.85rem;
+    font-weight:600;
+    display:inline-flex; align-items:center; gap:6px;
+    transition: transform .08s ease, opacity .15s;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: var(--coffee-dark); color: var(--cream); }
+  .btn-primary:hover{ background: var(--coffee); }
+  .btn-accent{ background: var(--caramel); color: #fff; }
+  .btn-accent:hover{ opacity:0.9; }
+  .btn-outline{ background: transparent; border:1.5px solid var(--coffee-soft); color: var(--coffee); }
+  .btn-outline:hover{ background: var(--caramel-light); }
+  .btn-danger{ background: var(--clay-bg); color: var(--clay); }
+  .btn-danger:hover{ background:#f0cdbb; }
+  .btn-sm{ padding:6px 12px; font-size:0.76rem; }
+  .btn-block{ width:100%; justify-content:center; }
+  .btn[disabled]{ opacity:0.5; cursor:not-allowed; }
+
+  .btn-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+  /* ===== Table ===== */
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse: collapse; font-size:0.85rem; }
+  th, td{ text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th{ color:var(--coffee-soft); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; }
+  tr:hover td{ background: rgba(184,129,60,0.06); }
+
+  .badge{
+    display:inline-block;
+    padding: 3px 10px;
+    border-radius:999px;
+    font-size:0.72rem;
+    font-weight:700;
+  }
+  .badge-success{ background: var(--sage-bg); color: var(--sage); }
+  .badge-warning{ background: var(--clay-bg); color: var(--clay); }
+  .badge-neutral{ background: var(--caramel-light); color: var(--coffee); }
+
+  /* ===== Forms ===== */
+  label{ display:block; font-size:0.78rem; font-weight:700; color:var(--coffee-soft); margin: 12px 0 5px 0; }
+  input, select, textarea{
+    width:100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-size: 0.9rem;
+    color: var(--coffee-dark);
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline: none;
+    border-color: var(--caramel);
+    box-shadow: 0 0 0 3px var(--caramel-light);
+  }
+  textarea{ resize:vertical; min-height:60px; }
+  .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .form-grid .full{ grid-column: 1 / -1; }
+  @media (max-width:520px){ .form-grid{ grid-template-columns: 1fr; } }
+
+  .star-select{ display:flex; gap:6px; }
+  .star-select button{
+    background:none; border:1.5px solid var(--line); border-radius:8px;
+    width:38px; height:38px; font-size:1rem; cursor:pointer; color: var(--coffee-soft);
+  }
+  .star-select button.active{ background: var(--caramel); color:#fff; border-color:var(--caramel); }
+
+  /* ===== Modal ===== */
+  .modal-backdrop{
+    display:none;
+    position:fixed; inset:0;
+    background: rgba(58,40,32,0.45);
+    z-index: 50;
+    align-items:flex-end;
+    justify-content:center;
+    padding: 0;
+  }
+  .modal-backdrop.open{ display:flex; }
+  .modal{
+    background: var(--paper);
+    width:100%;
+    max-width: 560px;
+    max-height: 92vh;
+    overflow-y:auto;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 26px 20px;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.2);
+  }
+  @media (min-width:640px){
+    .modal-backdrop{ align-items:center; }
+    .modal{ border-radius: var(--radius); }
+  }
+  .modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .modal-close{ background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--coffee-soft); line-height:1;}
+
+  .empty-state{
+    text-align:center;
+    padding: 30px 12px;
+    color: var(--coffee-soft);
+  }
+  .empty-state .emoji{ font-size:2.2rem; display:block; margin-bottom:8px; }
+
+  .toast{
+    position:fixed;
+    bottom: 20px; left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--coffee-dark);
+    color: var(--cream);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size:0.85rem;
+    box-shadow: var(--shadow);
+    opacity:0;
+    pointer-events:none;
+    transition: all .25s ease;
+    z-index: 80;
+    max-width: 90%;
+    text-align:center;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  .divider{ height:1px; background: var(--line); margin: 14px 0; border:none; }
+
+  .qr-box{
+    display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+    background: var(--caramel-light);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+  .qr-placeholder{
+    width:96px; height:96px;
+    flex:0 0 auto;
+    background: repeating-conic-gradient(var(--coffee-dark) 0% 25%, #fff 0% 50%) 50% / 14px 14px;
+    border-radius: 8px;
+    border: 4px solid #fff;
+    box-shadow: var(--shadow);
+  }
+  .kv{ display:flex; justify-content:space-between; padding:6px 0; font-size:0.88rem; border-bottom:1px dashed var(--line); }
+  .kv:last-child{ border-bottom:none; }
+  .kv .k{ color: var(--coffee-soft); }
+  .kv .v{ font-weight:700; }
+
+  .checkbox-row{ display:flex; align-items:center; gap:8px; margin-top:14px; }
+  .checkbox-row input{ width:auto; }
+
+  .search-bar{ margin-bottom:12px; }
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .filter-row select{ width:auto; }
+
+  footer.tip{
+    text-align:center;
+    color: var(--coffee-soft);
+    font-size:0.75rem;
+    margin: 28px 0 10px 0;
+  }
+</style>
+
+<!-- Feedback auto-sync: Firebase config (edit config.js with your own project details) -->
+<script src="config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand"><span id="brandEmoji">☕</span><span id="brandName">Coffee Jelly Co.</span></div>
+  <div class="sub">Weekly order &amp; production manager</div>
+  <div class="header-meta">
+    <span class="pill" id="headerDeliveryPill">🚚 Delivery: —</span>
+    <span class="pill" id="headerStatusPill">📦 Status: —</span>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab-btn" data-view="dashboard">🏠 Dashboard</button>
+    <button class="tab-btn" data-view="orders">📝 Orders</button>
+    <button class="tab-btn" data-view="production">📦 Production</button>
+    <button class="tab-btn" data-view="ingredients">🧾 Ingredients</button>
+    <button class="tab-btn" data-view="feedback">💬 Feedback</button>
+    <button class="tab-btn" data-view="qr">📱 QR Codes</button>
+    <button class="tab-btn" data-view="settings">⚙️ Settings</button>
+    <button class="tab-btn" data-view="data">💾 Data</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- DASHBOARD -->
+  <div class="view" id="view-dashboard">
+    <h2 class="section-title">Dashboard</h2>
+    <p class="section-sub">Everything you need to know about this week's orders — at a glance.</p>
+
+    <div class="hero-cup-card">
+      <div class="hero-cup-svg" id="heroCupSvg"></div>
+      <div class="hero-text">
+        <div class="hero-label">Cups to prepare</div>
+        <div class="hero-number" id="heroCupsNumber">0</div>
+        <div class="hero-msg" id="heroMsg">No orders yet this week.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>This week's workflow</h3>
+      <div class="stepper" id="stepper"></div>
+      <div class="btn-row" id="workflowActions"></div>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="card">
+      <div class="card-row">
+        <h3 style="margin:0;">Recent orders</h3>
+        <button class="btn btn-outline btn-sm" data-view-link="orders">View all →</button>
+      </div>
+      <div class="table-wrap" id="dashboardRecentOrders"></div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="view" id="view-orders">
+    <div class="card-row" style="margin-bottom:10px;">
+      <div>
+        <h2 class="section-title" style="margin-bottom:0;">Orders</h2>
+        <p class="section-sub" style="margin-bottom:0;">Manage this week's customer orders.</p>
+      </div>
+      <button class="btn btn-accent" id="btnAddOrder">＋ Add Order</button>
+    </div>
+
+    <div class="filter-row">
+      <select id="filterWeek"></select>
+      <select id="filterPayment">
+        <option value="all">All payments</option>
+        <option value="Paid">Paid</option>
+        <option value="Pending">Pending</option>
+      </select>
+      <select id="filterDelivery">
+        <option value="all">All statuses</option>
+        <option value="For Delivery">For Delivery</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Pickup">Pickup</option>
+        <option value="Completed">Completed</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap" id="ordersTable"></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTION -->
+  <div class="view" id="view-production">
+    <h2 class="section-title">Weekly Production</h2>
+    <p class="section-sub">Your production requirement for the current weekly batch — based on real orders, not your full target.</p>
+    <div class="stat-grid" id="productionStats"></div>
+    <div class="card">
+      <h3>Production message</h3>
+      <p id="productionMsg" style="font-size:1rem;"></p>
+    </div>
+    <div class="card">
+      <h3>Shopping list preview</h3>
+      <p class="section-sub" style="margin-bottom:10px;">Based on cups ordered this week. Edit your recipe in the Ingredients tab.</p>
+      <div class="table-wrap" id="productionIngredients"></div>
+    </div>
+  </div>
+
+  <!-- INGREDIENTS -->
+  <div class="view" id="view-ingredients">
+    <div class="card-row" style="margin-bottom:10px;">
+      <div>
+        <h2 class="section-title" style="margin-bottom:0;">Ingredients</h2>
+        <p class="section-sub" style="margin-bottom:0;">Your recipe for ONE cup of Coffee Jelly. This is kept separate from your sales dashboard.</p>
+      </div>
+      <button class="btn btn-accent" id="btnAddIngredient">＋ Add Ingredient</button>
+    </div>
+    <div class="card">
+      <h3>Recipe (per cup)</h3>
+      <div class="table-wrap" id="ingredientsTable"></div>
+    </div>
+    <div class="card">
+      <h3>Total needed for this week (<span id="ingCupsTotal">0</span> cups)</h3>
+      <div class="table-wrap" id="ingredientsTotals"></div>
+    </div>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="view" id="view-feedback">
+    <div class="card-row" style="margin-bottom:10px;">
+      <div>
+        <h2 class="section-title" style="margin-bottom:0;">Customer Feedback</h2>
+        <p class="section-sub" style="margin-bottom:0;">Collected via the QR code on your packaging.</p>
+      </div>
+      <button class="btn btn-accent" id="btnAddFeedback">＋ Add Feedback</button>
+    </div>
+    <div class="card" id="feedbackSyncBanner" style="padding:12px 16px;"></div>
+    <div class="stat-grid" id="feedbackStats"></div>
+    <div class="card">
+      <h3>All responses</h3>
+      <div class="table-wrap" id="feedbackTable"></div>
+    </div>
+  </div>
+
+  <!-- QR -->
+  <div class="view" id="view-qr">
+    <h2 class="section-title">QR Codes</h2>
+    <p class="section-sub">Once this app is hosted online (see the setup guide included with your files), paste the links below to generate real, scannable QR codes — printable straight from this page.</p>
+
+    <div class="card" id="syncStatusCard"></div>
+
+    <div class="card">
+      <h3>QR #1 — Order Again</h3>
+      <div class="qr-box">
+        <div id="qrOrderCanvas" class="qr-placeholder"></div>
+        <div style="flex:1; min-width:180px;">
+          <p style="font-style:italic; margin-bottom:8px;">"Want another Coffee Jelly? Scan to order again! ☕🍮"</p>
+          <label style="margin-top:0;">Link this QR should point to</label>
+          <input type="text" id="qrOrderLink" placeholder="e.g. your online order form link">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" id="btnDownloadOrderQr">⬇️ Download PNG</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>QR #2 — Give Us Feedback</h3>
+      <div class="qr-box">
+        <div id="qrFeedbackCanvas" class="qr-placeholder"></div>
+        <div style="flex:1; min-width:180px;">
+          <p style="font-style:italic; margin-bottom:8px;">"Enjoyed your Coffee Jelly? Tell us what you think! 💬"</p>
+          <label style="margin-top:0;">Your hosted feedback page URL</label>
+          <input type="text" id="qrFeedbackLink" placeholder="e.g. https://yourname.github.io/coffee-jelly/feedback.html">
+          <p style="font-size:0.75rem;color:var(--coffee-soft);margin-top:6px;">This must point to <strong>feedback.html</strong> (included alongside this file) once it's hosted online — that's what makes responses land automatically in your Feedback tab.</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" id="btnDownloadFeedbackQr">⬇️ Download PNG</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btnSaveQr">Save links &amp; generate QR codes</button>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings">
+    <h2 class="section-title">Business Settings</h2>
+    <p class="section-sub">Changes here automatically update your Dashboard.</p>
+    <div class="card">
+      <label>Business / product name</label>
+      <input type="text" id="setBusinessName">
+
+      <div class="form-grid">
+        <div>
+          <label>Default price per cup (₱)</label>
+          <input type="number" id="setPrice" min="0" step="0.01">
+        </div>
+        <div>
+          <label>Weekly cup target</label>
+          <input type="number" id="setTarget" min="0" step="1">
+        </div>
+        <div>
+          <label>Weekly delivery day</label>
+          <select id="setDeliveryDay">
+            <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+            <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+          </select>
+        </div>
+        <div>
+          <label>Order cutoff day</label>
+          <select id="setCutoffDay">
+            <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+            <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+          </select>
+        </div>
+        <div>
+          <label>Order cutoff time</label>
+          <input type="time" id="setCutoffTime">
+        </div>
+        <div>
+          <label>Current delivery date</label>
+          <input type="date" id="setDeliveryDate">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px;" id="btnSaveSettings">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div class="view" id="view-data">
+    <h2 class="section-title">Data</h2>
+    <p class="section-sub">Everything is stored privately in this browser (localStorage) — nothing is sent online.</p>
+
+    <div class="card">
+      <h3>Backup &amp; Export</h3>
+      <p style="color:var(--coffee-soft); font-size:0.85rem; margin-bottom:10px;">Save a copy of everything, or export just your orders as a spreadsheet-ready CSV.</p>
+      <div class="btn-row">
+        <button class="btn btn-outline" id="btnBackup">⬇️ Backup All Data (.json)</button>
+        <button class="btn btn-outline" id="btnExportCsv">⬇️ Export Orders (.csv)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Restore Data</h3>
+      <p style="color:var(--coffee-soft); font-size:0.85rem; margin-bottom:10px;">Load a previously saved backup file. This will replace your current data.</p>
+      <input type="file" id="restoreFile" accept="application/json">
+    </div>
+
+    <div class="card">
+      <h3 style="color:var(--clay);">Clear All Data</h3>
+      <p style="color:var(--coffee-soft); font-size:0.85rem;">This permanently deletes all orders, ingredients, feedback and settings from this browser.</p>
+      <div class="checkbox-row">
+        <input type="checkbox" id="confirmClear">
+        <label style="margin:0;" for="confirmClear">I understand this cannot be undone</label>
+      </div>
+      <button class="btn btn-danger" style="margin-top:12px;" id="btnClearData" disabled>🗑️ Clear All Data</button>
+    </div>
+  </div>
+
+</div>
+
+<footer class="tip">Made for a home-based Coffee Jelly business ☕🍮 — your data stays on this device.</footer>
+
+<!-- Order Modal -->
+<div class="modal-backdrop" id="orderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="orderModalTitle">Add Order</h3>
+      <button class="modal-close" data-close="orderModal">✕</button>
+    </div>
+    <input type="hidden" id="orderId">
+    <div class="form-grid">
+      <div class="full">
+        <label>Customer name</label>
+        <input type="text" id="orderName" placeholder="Juana Dela Cruz">
+      </div>
+      <div class="full">
+        <label>Contact number / Messenger</label>
+        <input type="text" id="orderContact" placeholder="09xx xxx xxxx or FB Messenger name">
+      </div>
+      <div>
+        <label>Number of cups</label>
+        <input type="number" id="orderCups" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Price per cup (₱)</label>
+        <input type="number" id="orderPrice" min="0" step="0.01">
+      </div>
+      <div>
+        <label>Payment status</label>
+        <select id="orderPayment"><option>Pending</option><option>Paid</option></select>
+      </div>
+      <div>
+        <label>Fulfillment</label>
+        <select id="orderFulfillment"><option>Delivery</option><option>Pickup</option></select>
+      </div>
+      <div>
+        <label>Delivery / pickup status</label>
+        <select id="orderStatus"></select>
+      </div>
+      <div>
+        <label>Order date</label>
+        <input type="date" id="orderDate">
+      </div>
+      <div class="full">
+        <label>Customer notes</label>
+        <textarea id="orderNotes" placeholder="Less ice, extra jelly, deliver after 5pm, etc."></textarea>
+      </div>
+    </div>
+    <div class="card" style="margin: 14px 0 0 0; background:var(--caramel-light); border:none;">
+      <div class="kv"><span class="k">Total amount</span><span class="v" id="orderTotalPreview">₱0.00</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSaveOrder">Save Order</button>
+      <button class="btn btn-outline" data-close="orderModal">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ingredient Modal -->
+<div class="modal-backdrop" id="ingredientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="ingredientModalTitle">Add Ingredient</h3>
+      <button class="modal-close" data-close="ingredientModal">✕</button>
+    </div>
+    <input type="hidden" id="ingredientId">
+    <label>Ingredient name</label>
+    <input type="text" id="ingredientName" placeholder="Coffee">
+    <div class="form-grid">
+      <div>
+        <label>Quantity per cup</label>
+        <input type="number" id="ingredientQty" min="0" step="0.01">
+      </div>
+      <div>
+        <label>Unit</label>
+        <select id="ingredientUnit">
+          <option>ml</option><option>g</option><option>kg</option><option>L</option>
+          <option>tbsp</option><option>tsp</option><option>pcs</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSaveIngredient">Save Ingredient</button>
+      <button class="btn btn-outline" data-close="ingredientModal">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal-backdrop" id="feedbackModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Feedback</h3>
+      <button class="modal-close" data-close="feedbackModal">✕</button>
+    </div>
+    <label>Customer name (optional)</label>
+    <input type="text" id="fbName">
+
+    <label>Taste rating</label>
+    <div class="star-select" data-field="fbTaste"></div>
+
+    <label>Sweetness rating</label>
+    <div class="star-select" data-field="fbSweetness"></div>
+
+    <label>Texture rating</label>
+    <div class="star-select" data-field="fbTexture"></div>
+
+    <label>Would you buy again?</label>
+    <select id="fbBuyAgain"><option>Yes</option><option>Maybe</option><option>No</option></select>
+
+    <label>What did you like?</label>
+    <textarea id="fbLiked"></textarea>
+
+    <label>What should we improve?</label>
+    <textarea id="fbImprove"></textarea>
+
+    <label>Additional comments</label>
+    <textarea id="fbComments"></textarea>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSaveFeedback">Submit Feedback</button>
+      <button class="btn btn-outline" data-close="feedbackModal">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ STATE ============ */
+  var STORAGE_KEY = "coffeeJellyAppData_v1";
+  var DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  function defaultState(){
+    var d = new Date();
+    var nextDelivery = nextDateForDay(d, "Sunday");
+    return {
+      settings: {
+        businessName: "Coffee Jelly Co.",
+        pricePerCup: 60,
+        weeklyTarget: 50,
+        deliveryDay: "Sunday",
+        cutoffDay: "Thursday",
+        cutoffTime: "20:00",
+        currentDeliveryDate: isoDate(nextDelivery),
+        weekStatus: "collecting", // collecting -> closed -> prepared -> delivered
+        qrOrderLink: "",
+        qrFeedbackLink: ""
+      },
+      orders: [],
+      ingredients: [
+        {id: uid(), name:"Coffee", qty:100, unit:"ml"},
+        {id: uid(), name:"Milk", qty:50, unit:"ml"},
+        {id: uid(), name:"Jelly powder", qty:5, unit:"g"},
+        {id: uid(), name:"Sugar", qty:10, unit:"g"}
+      ],
+      feedback: []
+    };
+  }
+
+  var state = load();
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      // shallow-fill in case of missing keys from older versions
+      var def = defaultState();
+      parsed.settings = Object.assign({}, def.settings, parsed.settings || {});
+      parsed.orders = parsed.orders || [];
+      parsed.ingredients = parsed.ingredients || def.ingredients;
+      parsed.feedback = parsed.feedback || [];
+      return parsed;
+    }catch(e){
+      console.error("Failed to load data, starting fresh.", e);
+      return defaultState();
+    }
+  }
+
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function uid(){ return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+  /* ============ DATE HELPERS ============ */
+  function isoDate(d){
+    var y=d.getFullYear(), m=(''+(d.getMonth()+1)).padStart(2,'0'), day=(''+d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+  function nextDateForDay(fromDate, dayName){
+    var targetIdx = DAY_NAMES.indexOf(dayName);
+    var d = new Date(fromDate);
+    d.setHours(0,0,0,0);
+    var diff = (targetIdx - d.getDay() + 7) % 7;
+    if(diff === 0) diff = 7; // next occurrence, not today
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+  function addDays(iso, days){
+    var d = new Date(iso + "T00:00:00");
+    d.setDate(d.getDate()+days);
+    return isoDate(d);
+  }
+  function formatDate(iso){
+    if(!iso) return "—";
+    var d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+  }
+  function formatMoney(n){
+    n = Number(n)||0;
+    return '₱' + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  /* ============ TOAST ============ */
+  var toastTimer;
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+  }
+
+  /* ============ NAV ============ */
+  var tabButtons = document.querySelectorAll('.tab-btn');
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){ switchView(btn.dataset.view); });
+  });
+  document.querySelectorAll('[data-view-link]').forEach(function(el){
+    el.addEventListener('click', function(){ switchView(el.dataset.viewLink); });
+  });
+
+  function switchView(name){
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    var view = document.getElementById('view-' + name);
+    var btn = document.querySelector('.tab-btn[data-view="'+name+'"]');
+    if(view) view.classList.add('active');
+    if(btn) btn.classList.add('active');
+    renderAll();
+    if(name === 'feedback' && firebaseReady) loadCloudFeedback();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  /* ============ CORE COMPUTATIONS ============ */
+  function currentWeekOrders(){
+    return state.orders.filter(function(o){ return o.deliveryDate === state.settings.currentDeliveryDate; });
+  }
+
+  function weekStats(orders){
+    var totalOrders = orders.length;
+    var totalCups = orders.reduce(function(s,o){ return s + (Number(o.cups)||0); }, 0);
+    var totalRevenue = orders.reduce(function(s,o){ return s + (Number(o.total)||0); }, 0);
+    var paidOrders = orders.filter(function(o){ return o.paymentStatus === 'Paid'; }).length;
+    var pendingOrders = orders.filter(function(o){ return o.paymentStatus === 'Pending'; }).length;
+    var pendingAmount = orders.filter(function(o){ return o.paymentStatus === 'Pending'; })
+                              .reduce(function(s,o){ return s + (Number(o.total)||0); }, 0);
+    return {totalOrders:totalOrders, totalCups:totalCups, totalRevenue:totalRevenue, paidOrders:paidOrders, pendingOrders:pendingOrders, pendingAmount:pendingAmount};
+  }
+
+  /* ============ HERO CUP SVG ============ */
+  function renderHeroCup(pct){
+    pct = Math.max(0, Math.min(1, pct));
+    var fillHeight = 70 * pct;
+    var fillY = 96 - fillHeight;
+    return '' +
+    '<svg width="86" height="100" viewBox="0 0 86 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs><clipPath id="cupClip"><path d="M14 26 L20 92 Q43 100 66 92 L72 26 Z"/></clipPath></defs>' +
+      '<path d="M14 26 L20 92 Q43 100 66 92 L72 26 Z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>' +
+      '<g clip-path="url(#cupClip)">' +
+        '<rect x="10" y="'+fillY+'" width="66" height="70" fill="#B8813C"/>' +
+        '<rect x="10" y="'+fillY+'" width="66" height="6" fill="#D9A15F"/>' +
+      '</g>' +
+      '<ellipse cx="43" cy="26" rx="29" ry="7" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>' +
+      '<path d="M70 32 Q84 34 80 48 Q77 58 66 56" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>' +
+    '</svg>';
+  }
+
+  /* ============ RENDER: DASHBOARD ============ */
+  function renderDashboard(){
+    var s = state.settings;
+    var orders = currentWeekOrders();
+    var st = weekStats(orders);
+    var target = Number(s.weeklyTarget)||0;
+    var remaining = Math.max(0, target - st.totalCups);
+    var pct = target > 0 ? st.totalCups/target : 0;
+
+    document.getElementById('brandName').textContent = s.businessName || "Coffee Jelly Co.";
+    document.getElementById('headerDeliveryPill').textContent = '🚚 Delivery: ' + formatDate(s.currentDeliveryDate);
+    document.getElementById('headerStatusPill').textContent = '📦 Status: ' + statusLabel(s.weekStatus);
+
+    document.getElementById('heroCupSvg').innerHTML = renderHeroCup(pct);
+    document.getElementById('heroCupsNumber').textContent = st.totalCups;
+
+    var msg;
+    if(st.totalCups === 0){
+      msg = "No orders yet this week. Once orders come in, this will tell you exactly how many cups to prepare.";
+    } else if(target > 0){
+      msg = st.totalCups + ' / ' + target + ' cups ordered — ' + remaining + ' cups remaining to target.';
+    } else {
+      msg = 'You have ' + st.totalCups + " cups ordered. Prepare " + st.totalCups + " cups for this week's delivery.";
+    }
+    document.getElementById('heroMsg').textContent = msg;
+
+    // Stepper
+    var steps = [
+      {key:'collecting', icon:'📝', label:'Collect Orders'},
+      {key:'closed', icon:'🔒', label:'Close Orders'},
+      {key:'prepared', icon:'🍮', label:'Prepare'},
+      {key:'delivered', icon:'🚚', label:'Deliver'},
+      {key:'feedback', icon:'💬', label:'Feedback'}
+    ];
+    var order = ['collecting','closed','prepared','delivered','feedback'];
+    var currentIdx = order.indexOf(s.weekStatus === 'feedback_open' ? 'feedback' : s.weekStatus);
+    if(currentIdx === -1) currentIdx = 0;
+    var stepperHtml = steps.map(function(st2, i){
+      var cls = i < currentIdx ? 'done' : (i === currentIdx ? 'current' : '');
+      return '<div class="step '+cls+'"><div class="dot">'+ (i < currentIdx ? '✓' : st2.icon) +'</div><div class="lbl">'+st2.label+'</div></div>';
+    }).join('');
+    document.getElementById('stepper').innerHTML = stepperHtml;
+
+    var actionsEl = document.getElementById('workflowActions');
+    actionsEl.innerHTML = '';
+    if(s.weekStatus === 'collecting'){
+      actionsEl.innerHTML = '<button class="btn btn-accent" id="btnCloseWeek">🔒 Close Weekly Orders</button>';
+    } else if(s.weekStatus === 'closed'){
+      actionsEl.innerHTML = '<button class="btn btn-accent" id="btnMarkPrepared">🍮 Mark as Prepared</button> <button class="btn btn-outline" id="btnReopenWeek">↩️ Reopen for Orders</button>';
+    } else if(s.weekStatus === 'prepared'){
+      actionsEl.innerHTML = '<button class="btn btn-accent" id="btnMarkDelivered">🚚 Mark as Delivered</button>';
+    } else if(s.weekStatus === 'delivered'){
+      actionsEl.innerHTML = '<button class="btn btn-primary" id="btnStartNewWeek">🔄 Start New Week</button>';
+    }
+    bindWorkflowButtons();
+
+    // Stats grid
+    var stats = [
+      {num: st.totalOrders, lbl:'Total Orders'},
+      {num: st.totalCups, lbl:'Total Cups Ordered'},
+      {num: formatMoney(st.totalRevenue), lbl:'Total Sales'},
+      {num: st.paidOrders, lbl:'Paid Orders'},
+      {num: st.pendingOrders + ' (' + formatMoney(st.pendingAmount) + ')', lbl:'Pending Payments'},
+      {num: target>0 ? remaining : '—', lbl:'Cups Remaining to Target'}
+    ];
+    document.getElementById('statGrid').innerHTML = stats.map(function(x){
+      return '<div class="stat-box"><div class="num">'+x.num+'</div><div class="lbl">'+x.lbl+'</div></div>';
+    }).join('');
+
+    // Recent orders
+    var recent = orders.slice().sort(function(a,b){ return (b.orderDate||'').localeCompare(a.orderDate||''); }).slice(0,5);
+    document.getElementById('dashboardRecentOrders').innerHTML = recent.length ? renderOrdersTableHtml(recent, true) : emptyState('☕','No orders yet — add your first order to get started.');
+    bindRowButtons(document.getElementById('dashboardRecentOrders'));
+  }
+
+  function statusLabel(status){
+    return {collecting:'Collecting Orders', closed:'Orders Closed', prepared:'Prepared', delivered:'Delivered'}[status] || 'Collecting Orders';
+  }
+
+  function bindWorkflowButtons(){
+    var closeBtn = document.getElementById('btnCloseWeek');
+    if(closeBtn) closeBtn.addEventListener('click', function(){
+      state.settings.weekStatus = 'closed';
+      save(); renderAll();
+      showToast('Weekly orders closed. Time to prepare!');
+    });
+    var reopenBtn = document.getElementById('btnReopenWeek');
+    if(reopenBtn) reopenBtn.addEventListener('click', function(){
+      state.settings.weekStatus = 'collecting';
+      save(); renderAll();
+      showToast('Reopened for new orders.');
+    });
+    var prepBtn = document.getElementById('btnMarkPrepared');
+    if(prepBtn) prepBtn.addEventListener('click', function(){
+      state.settings.weekStatus = 'prepared';
+      save(); renderAll();
+      showToast('Marked as prepared. Ready for delivery!');
+    });
+    var delivBtn = document.getElementById('btnMarkDelivered');
+    if(delivBtn) delivBtn.addEventListener('click', function(){
+      state.settings.weekStatus = 'delivered';
+      save(); renderAll();
+      showToast("Delivered! Don't forget to collect feedback.");
+    });
+    var newWeekBtn = document.getElementById('btnStartNewWeek');
+    if(newWeekBtn) newWeekBtn.addEventListener('click', function(){
+      var newDate = nextDateForDay(new Date(state.settings.currentDeliveryDate + "T00:00:00"), state.settings.deliveryDay);
+      state.settings.currentDeliveryDate = isoDate(newDate);
+      state.settings.weekStatus = 'collecting';
+      save(); renderAll();
+      showToast('New week started — delivery date set to ' + formatDate(state.settings.currentDeliveryDate));
+    });
+  }
+
+  /* ============ RENDER: ORDERS ============ */
+  function allWeekDates(){
+    var set = {};
+    state.orders.forEach(function(o){ set[o.deliveryDate] = true; });
+    set[state.settings.currentDeliveryDate] = true;
+    return Object.keys(set).sort().reverse();
+  }
+
+  function renderOrdersFilterOptions(){
+    var sel = document.getElementById('filterWeek');
+    var dates = allWeekDates();
+    var current = sel.value || state.settings.currentDeliveryDate;
+    sel.innerHTML = dates.map(function(d){
+      var label = formatDate(d) + (d === state.settings.currentDeliveryDate ? ' (current)' : '');
+      return '<option value="'+d+'">'+label+'</option>';
+    }).join('');
+    if(dates.indexOf(current) !== -1) sel.value = current;
+  }
+
+  function renderOrders(){
+    renderOrdersFilterOptions();
+    var weekFilter = document.getElementById('filterWeek').value || state.settings.currentDeliveryDate;
+    var payFilter = document.getElementById('filterPayment').value;
+    var delFilter = document.getElementById('filterDelivery').value;
+
+    var filtered = state.orders.filter(function(o){
+      if(o.deliveryDate !== weekFilter) return false;
+      if(payFilter !== 'all' && o.paymentStatus !== payFilter) return false;
+      if(delFilter !== 'all' && o.deliveryStatus !== delFilter) return false;
+      return true;
+    }).sort(function(a,b){ return (b.orderDate||'').localeCompare(a.orderDate||''); });
+
+    document.getElementById('ordersTable').innerHTML = filtered.length ? renderOrdersTableHtml(filtered, false) : emptyState('📝','No orders match this view yet.');
+    bindRowButtons(document.getElementById('ordersTable'));
+  }
+
+  function renderOrdersTableHtml(orders, compact){
+    var rows = orders.map(function(o){
+      var payBadge = o.paymentStatus === 'Paid' ? '<span class="badge badge-success">Paid</span>' : '<span class="badge badge-warning">Pending</span>';
+      var statusBadge = '<span class="badge badge-neutral">'+o.deliveryStatus+'</span>';
+      var actions = compact ? '' :
+        '<button class="btn btn-outline btn-sm" data-edit-order="'+o.id+'">Edit</button> '+
+        '<button class="btn btn-danger btn-sm" data-delete-order="'+o.id+'">Delete</button>';
+      return '<tr>'+
+        '<td><strong>'+escapeHtml(o.name)+'</strong><br><span style="color:var(--coffee-soft);font-size:0.75rem;">'+escapeHtml(o.contact||'')+'</span></td>'+
+        '<td>'+o.cups+'</td>'+
+        '<td>'+formatMoney(o.total)+'</td>'+
+        '<td>'+payBadge+'</td>'+
+        '<td>'+statusBadge+'</td>'+
+        '<td>'+formatDate(o.orderDate)+'</td>'+
+        (compact ? '' : '<td>'+actions+'</td>') +
+      '</tr>';
+    }).join('');
+    return '<table><thead><tr><th>Customer</th><th>Cups</th><th>Total</th><th>Payment</th><th>Status</th><th>Order Date</th>'+(compact?'':'<th>Actions</th>')+'</tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  function bindRowButtons(container){
+    container.querySelectorAll('[data-edit-order]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openOrderModal(btn.dataset.editOrder); });
+    });
+    container.querySelectorAll('[data-delete-order]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(confirm('Delete this order? This cannot be undone.')){
+          state.orders = state.orders.filter(function(o){ return o.id !== btn.dataset.deleteOrder; });
+          save(); renderAll();
+          showToast('Order deleted.');
+        }
+      });
+    });
+  }
+
+  document.getElementById('filterWeek').addEventListener('change', renderOrders);
+  document.getElementById('filterPayment').addEventListener('change', renderOrders);
+  document.getElementById('filterDelivery').addEventListener('change', renderOrders);
+
+  /* ============ ORDER MODAL ============ */
+  var orderModal = document.getElementById('orderModal');
+  var deliveryStatusOptions = {
+    'Delivery': ['For Delivery','Delivered'],
+    'Pickup': ['Pickup','Completed']
+  };
+
+  document.getElementById('orderFulfillment').addEventListener('change', function(){
+    populateStatusOptions(this.value);
+  });
+  function populateStatusOptions(fulfillment){
+    var sel = document.getElementById('orderStatus');
+    var opts = deliveryStatusOptions[fulfillment] || deliveryStatusOptions['Delivery'];
+    sel.innerHTML = opts.map(function(o){ return '<option>'+o+'</option>'; }).join('');
+  }
+
+  function openOrderModal(orderId){
+    document.getElementById('orderModalTitle').textContent = orderId ? 'Edit Order' : 'Add Order';
+    document.getElementById('orderId').value = orderId || '';
+    if(orderId){
+      var o = state.orders.find(function(x){ return x.id === orderId; });
+      document.getElementById('orderName').value = o.name;
+      document.getElementById('orderContact').value = o.contact;
+      document.getElementById('orderCups').value = o.cups;
+      document.getElementById('orderPrice').value = o.pricePerCup;
+      document.getElementById('orderPayment').value = o.paymentStatus;
+      document.getElementById('orderFulfillment').value = o.fulfillment;
+      populateStatusOptions(o.fulfillment);
+      document.getElementById('orderStatus').value = o.deliveryStatus;
+      document.getElementById('orderDate').value = o.orderDate;
+      document.getElementById('orderNotes').value = o.notes || '';
+    } else {
+      document.getElementById('orderName').value = '';
+      document.getElementById('orderContact').value = '';
+      document.getElementById('orderCups').value = 1;
+      document.getElementById('orderPrice').value = state.settings.pricePerCup;
+      document.getElementById('orderPayment').value = 'Pending';
+      document.getElementById('orderFulfillment').value = 'Delivery';
+      populateStatusOptions('Delivery');
+      document.getElementById('orderStatus').value = 'For Delivery';
+      document.getElementById('orderDate').value = isoDate(new Date());
+      document.getElementById('orderNotes').value = '';
+    }
+    updateOrderTotalPreview();
+    orderModal.classList.add('open');
+  }
+
+  function updateOrderTotalPreview(){
+    var cups = Number(document.getElementById('orderCups').value)||0;
+    var price = Number(document.getElementById('orderPrice').value)||0;
+    document.getElementById('orderTotalPreview').textContent = formatMoney(cups*price);
+  }
+  document.getElementById('orderCups').addEventListener('input', updateOrderTotalPreview);
+  document.getElementById('orderPrice').addEventListener('input', updateOrderTotalPreview);
+
+  document.getElementById('btnAddOrder').addEventListener('click', function(){ openOrderModal(null); });
+
+  document.getElementById('btnSaveOrder').addEventListener('click', function(){
+    var name = document.getElementById('orderName').value.trim();
+    if(!name){ showToast('Please enter a customer name.'); return; }
+    var cups = Number(document.getElementById('orderCups').value)||0;
+    if(cups <= 0){ showToast('Number of cups must be at least 1.'); return; }
+    var price = Number(document.getElementById('orderPrice').value)||0;
+    var id = document.getElementById('orderId').value;
+
+    var orderData = {
+      name: name,
+      contact: document.getElementById('orderContact').value.trim(),
+      cups: cups,
+      pricePerCup: price,
+      total: cups*price,
+      paymentStatus: document.getElementById('orderPayment').value,
+      fulfillment: document.getElementById('orderFulfillment').value,
+      deliveryStatus: document.getElementById('orderStatus').value,
+      orderDate: document.getElementById('orderDate').value || isoDate(new Date()),
+      notes: document.getElementById('orderNotes').value.trim()
+    };
+
+    if(id){
+      var existing = state.orders.find(function(o){ return o.id === id; });
+      Object.assign(existing, orderData);
+      showToast('Order updated.');
+    } else {
+      orderData.id = uid();
+      orderData.deliveryDate = state.settings.currentDeliveryDate;
+      state.orders.push(orderData);
+      showToast('Order added — ' + cups + ' cup(s) for ' + name + '.');
+    }
+    save();
+    closeModal('orderModal');
+    renderAll();
+  });
+
+  /* ============ RENDER: PRODUCTION ============ */
+  function renderProduction(){
+    var orders = currentWeekOrders();
+    var st = weekStats(orders);
+    var target = Number(state.settings.weeklyTarget)||0;
+    var remaining = Math.max(0, target-st.totalCups);
+
+    document.getElementById('productionStats').innerHTML = [
+      {num:st.totalCups, lbl:'Total Cups Ordered'},
+      {num:st.totalCups, lbl:'Total Cups to Prepare'},
+      {num: target || '—', lbl:'Weekly Target'},
+      {num: target>0?remaining:'—', lbl:'Remaining to Target'},
+      {num: st.totalOrders, lbl:'Number of Customers'},
+      {num: formatMoney(st.totalRevenue), lbl:'Total Revenue'}
+    ].map(function(x){ return '<div class="stat-box"><div class="num">'+x.num+'</div><div class="lbl">'+x.lbl+'</div></div>'; }).join('');
+
+    var msg;
+    if(st.totalCups === 0){
+      msg = 'No orders yet this week. Nothing to prepare so far.';
+    } else {
+      msg = 'Prepare <strong>' + st.totalCups + "</strong> cups for this week's delivery — based on actual customer orders.";
+      if(target>0 && st.totalCups < target){
+        msg += " (Your target is " + target + ", but only make what's ordered.)";
+      }
+    }
+    document.getElementById('productionMsg').innerHTML = msg;
+
+    document.getElementById('productionIngredients').innerHTML = renderIngredientTotalsTable(st.totalCups);
+  }
+
+  /* ============ RENDER: INGREDIENTS ============ */
+  function renderIngredientTotalsTable(cups){
+    if(state.ingredients.length === 0) return emptyState('🧾','Add ingredients to see your shopping list.');
+    var rows = state.ingredients.map(function(ing){
+      var total = (Number(ing.qty)||0) * cups;
+      return '<tr><td>'+escapeHtml(ing.name)+'</td><td>'+total.toLocaleString(undefined,{maximumFractionDigits:2})+' '+ing.unit+'</td></tr>';
+    }).join('');
+    return '<table><thead><tr><th>Ingredient</th><th>Total Needed</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  function renderIngredients(){
+    var table = document.getElementById('ingredientsTable');
+    if(state.ingredients.length === 0){
+      table.innerHTML = emptyState('🧾','No ingredients yet. Add your Coffee Jelly recipe.');
+    } else {
+      var rows = state.ingredients.map(function(ing){
+        return '<tr><td>'+escapeHtml(ing.name)+'</td><td>'+ing.qty+' '+ing.unit+' / cup</td>'+
+          '<td><button class="btn btn-outline btn-sm" data-edit-ing="'+ing.id+'">Edit</button> '+
+          '<button class="btn btn-danger btn-sm" data-delete-ing="'+ing.id+'">Delete</button></td></tr>';
+      }).join('');
+      table.innerHTML = '<table><thead><tr><th>Ingredient</th><th>Per Cup</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    }
+    table.querySelectorAll('[data-edit-ing]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openIngredientModal(btn.dataset.editIng); });
+    });
+    table.querySelectorAll('[data-delete-ing]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(confirm('Delete this ingredient?')){
+          state.ingredients = state.ingredients.filter(function(i){ return i.id !== btn.dataset.deleteIng; });
+          save(); renderAll();
+          showToast('Ingredient deleted.');
+        }
+      });
+    });
+
+    var cups = weekStats(currentWeekOrders()).totalCups;
+    document.getElementById('ingCupsTotal').textContent = cups;
+    document.getElementById('ingredientsTotals').innerHTML = renderIngredientTotalsTable(cups);
+  }
+
+  function openIngredientModal(ingId){
+    document.getElementById('ingredientModalTitle').textContent = ingId ? 'Edit Ingredient' : 'Add Ingredient';
+    document.getElementById('ingredientId').value = ingId || '';
+    if(ingId){
+      var ing = state.ingredients.find(function(i){ return i.id === ingId; });
+      document.getElementById('ingredientName').value = ing.name;
+      document.getElementById('ingredientQty').value = ing.qty;
+      document.getElementById('ingredientUnit').value = ing.unit;
+    } else {
+      document.getElementById('ingredientName').value = '';
+      document.getElementById('ingredientQty').value = '';
+      document.getElementById('ingredientUnit').value = 'ml';
+    }
+    document.getElementById('ingredientModal').classList.add('open');
+  }
+  document.getElementById('btnAddIngredient').addEventListener('click', function(){ openIngredientModal(null); });
+  document.getElementById('btnSaveIngredient').addEventListener('click', function(){
+    var name = document.getElementById('ingredientName').value.trim();
+    if(!name){ showToast('Please enter an ingredient name.'); return; }
+    var qty = Number(document.getElementById('ingredientQty').value)||0;
+    var unit = document.getElementById('ingredientUnit').value;
+    var id = document.getElementById('ingredientId').value;
+    if(id){
+      var existing = state.ingredients.find(function(i){ return i.id === id; });
+      existing.name = name; existing.qty = qty; existing.unit = unit;
+      showToast('Ingredient updated.');
+    } else {
+      state.ingredients.push({id: uid(), name:name, qty:qty, unit:unit});
+      showToast('Ingredient added.');
+    }
+    save();
+    closeModal('ingredientModal');
+    renderAll();
+  });
+
+  /* ============ FIREBASE (feedback auto-sync) ============ */
+  var firebaseReady = false;
+  var cloudFeedback = [];
+  var cloudFeedbackLoaded = false;
+  (function initFirebase(){
+    try{
+      var cfg = window.FIREBASE_CONFIG;
+      if(cfg && cfg.apiKey && cfg.apiKey.indexOf('YOUR_') !== 0 && typeof firebase !== 'undefined'){
+        firebase.initializeApp(cfg);
+        window.__db = firebase.firestore();
+        firebaseReady = true;
+      }
+    }catch(e){ console.error('Firebase not configured yet:', e); firebaseReady = false; }
+  })();
+
+  function loadCloudFeedback(){
+    if(!firebaseReady) return;
+    window.__db.collection('feedback').orderBy('date','desc').limit(500).get().then(function(snap){
+      cloudFeedback = snap.docs.map(function(doc){ return doc.data(); });
+      cloudFeedbackLoaded = true;
+      renderFeedback();
+    }).catch(function(err){
+      console.error('Could not load cloud feedback:', err);
+      cloudFeedbackLoaded = true;
+      renderFeedback();
+    });
+  }
+
+  function renderSyncBanners(){
+    var qrBanner = document.getElementById('syncStatusCard');
+    var fbBanner = document.getElementById('feedbackSyncBanner');
+    if(firebaseReady){
+      var html = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🟢</span><div><strong>Auto-sync is connected.</strong><br><span style="color:var(--coffee-soft);font-size:0.85rem;">Feedback submitted through your QR code lands here automatically.</span></div></div>';
+      if(qrBanner) qrBanner.innerHTML = html;
+      if(fbBanner) fbBanner.innerHTML = html;
+    } else {
+      var html2 = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🟡</span><div><strong>Auto-sync isn\u2019t set up yet.</strong><br><span style="color:var(--coffee-soft);font-size:0.85rem;">Feedback you add manually is saved on this device only. Follow the SETUP-GUIDE that came with this app to connect your QR code — it takes about 10 minutes and is free.</span></div></div>';
+      if(qrBanner) qrBanner.innerHTML = html2;
+      if(fbBanner) fbBanner.innerHTML = html2;
+    }
+  }
+
+  /* ============ FEEDBACK ============ */
+  var fbRatings = {fbTaste:0, fbSweetness:0, fbTexture:0};
+  function buildStarSelectors(){
+    document.querySelectorAll('.star-select').forEach(function(wrap){
+      var field = wrap.dataset.field;
+      wrap.innerHTML = '';
+      for(var i=1;i<=5;i++){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = '⭐'.repeat(1);
+        b.textContent = i;
+        b.dataset.val = i;
+        b.addEventListener('click', function(){
+          fbRatings[field] = Number(this.dataset.val);
+          wrap.querySelectorAll('button').forEach(function(x){ x.classList.remove('active'); });
+          for(var j=0;j<wrap.children.length;j++){
+            if(Number(wrap.children[j].dataset.val) <= fbRatings[field]) wrap.children[j].classList.add('active');
+          }
+        });
+        wrap.appendChild(b);
+      }
+    });
+  }
+  buildStarSelectors();
+
+  document.getElementById('btnAddFeedback').addEventListener('click', function(){
+    fbRatings = {fbTaste:0, fbSweetness:0, fbTexture:0};
+    document.getElementById('fbName').value = '';
+    document.getElementById('fbBuyAgain').value = 'Yes';
+    document.getElementById('fbLiked').value = '';
+    document.getElementById('fbImprove').value = '';
+    document.getElementById('fbComments').value = '';
+    document.querySelectorAll('.star-select button').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('feedbackModal').classList.add('open');
+  });
+
+  document.getElementById('btnSaveFeedback').addEventListener('click', function(){
+    if(!fbRatings.fbTaste || !fbRatings.fbSweetness || !fbRatings.fbTexture){
+      showToast('Please rate taste, sweetness, and texture.');
+      return;
+    }
+    var entry = {
+      id: uid(),
+      name: document.getElementById('fbName').value.trim(),
+      taste: fbRatings.fbTaste,
+      sweetness: fbRatings.fbSweetness,
+      texture: fbRatings.fbTexture,
+      buyAgain: document.getElementById('fbBuyAgain').value,
+      liked: document.getElementById('fbLiked').value.trim(),
+      improve: document.getElementById('fbImprove').value.trim(),
+      comments: document.getElementById('fbComments').value.trim(),
+      date: isoDate(new Date())
+    };
+    if(firebaseReady){
+      window.__db.collection('feedback').add(entry).then(function(){
+        loadCloudFeedback();
+        showToast('Thanks — feedback recorded and synced!');
+      }).catch(function(err){
+        console.error(err);
+        state.feedback.push(entry);
+        save(); renderAll();
+        showToast('Saved locally (sync failed — check your connection).');
+      });
+    } else {
+      state.feedback.push(entry);
+      save();
+      renderAll();
+      showToast('Thanks — feedback recorded on this device.');
+    }
+    closeModal('feedbackModal');
+  });
+
+  function renderFeedback(){
+    renderSyncBanners();
+    var fb = firebaseReady ? cloudFeedback.concat(state.feedback) : state.feedback;
+    var count = fb.length;
+    var avg = function(key){ return count ? (fb.reduce(function(s,f){return s+f[key];},0)/count).toFixed(1) : '—'; };
+    var buyAgainPct = count ? Math.round(fb.filter(function(f){return f.buyAgain==='Yes';}).length/count*100) : 0;
+
+    document.getElementById('feedbackStats').innerHTML = [
+      {num: avg('taste'), lbl:'Avg Taste Rating'},
+      {num: avg('sweetness'), lbl:'Avg Sweetness Rating'},
+      {num: avg('texture'), lbl:'Avg Texture Rating'},
+      {num: count ? buyAgainPct+'%' : '—', lbl:'Would Buy Again'}
+    ].map(function(x){ return '<div class="stat-box"><div class="num">'+x.num+'</div><div class="lbl">'+x.lbl+'</div></div>'; }).join('');
+
+    var table = document.getElementById('feedbackTable');
+    if(count === 0){
+      table.innerHTML = emptyState('💬','No feedback yet. Encourage customers to scan the QR code!');
+    } else {
+      var rows = fb.slice().reverse().map(function(f){
+        return '<tr><td>'+escapeHtml(f.name||'Anonymous')+'</td><td>'+f.taste+'/5</td><td>'+f.sweetness+'/5</td><td>'+f.texture+'/5</td>'+
+          '<td>'+f.buyAgain+'</td><td>'+escapeHtml(f.liked||'')+'</td><td>'+escapeHtml(f.improve||'')+'</td><td>'+formatDate(f.date)+'</td></tr>';
+      }).join('');
+      table.innerHTML = '<table><thead><tr><th>Name</th><th>Taste</th><th>Sweet</th><th>Texture</th><th>Buy Again</th><th>Liked</th><th>Improve</th><th>Date</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    }
+  }
+
+  /* ============ QR ============ */
+  function drawQrInto(containerId, url){
+    var el = document.getElementById(containerId);
+    el.innerHTML = '';
+    el.classList.remove('qr-placeholder');
+    if(!url){
+      el.classList.add('qr-placeholder');
+      return;
+    }
+    el.style.background = '#fff';
+    el.style.border = '4px solid #fff';
+    el.style.boxShadow = 'var(--shadow)';
+    el.style.borderRadius = '8px';
+    try{
+      /* eslint-disable no-new */
+      new QRCode(el, {text: url, width: 128, height: 128, colorDark:"#3A2820", colorLight:"#ffffff"});
+    }catch(e){
+      console.error('QR generation failed', e);
+      el.classList.add('qr-placeholder');
+    }
+  }
+
+  function downloadQrFromContainer(containerId, filename){
+    var el = document.getElementById(containerId);
+    var canvas = el.querySelector('canvas');
+    var img = el.querySelector('img');
+    var dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
+    if(!dataUrl){ showToast('Add a link and save first to generate the QR code.'); return; }
+    var a = document.createElement('a');
+    a.href = dataUrl; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  function renderQr(){
+    renderSyncBanners();
+    document.getElementById('qrOrderLink').value = state.settings.qrOrderLink || '';
+    document.getElementById('qrFeedbackLink').value = state.settings.qrFeedbackLink || '';
+    drawQrInto('qrOrderCanvas', state.settings.qrOrderLink || '');
+    drawQrInto('qrFeedbackCanvas', state.settings.qrFeedbackLink || '');
+  }
+  document.getElementById('btnSaveQr').addEventListener('click', function(){
+    state.settings.qrOrderLink = document.getElementById('qrOrderLink').value.trim();
+    state.settings.qrFeedbackLink = document.getElementById('qrFeedbackLink').value.trim();
+    save();
+    drawQrInto('qrOrderCanvas', state.settings.qrOrderLink);
+    drawQrInto('qrFeedbackCanvas', state.settings.qrFeedbackLink);
+    showToast('Links saved — QR codes generated.');
+  });
+  document.getElementById('btnDownloadOrderQr').addEventListener('click', function(){
+    downloadQrFromContainer('qrOrderCanvas', 'order-again-qr.png');
+  });
+  document.getElementById('btnDownloadFeedbackQr').addEventListener('click', function(){
+    downloadQrFromContainer('qrFeedbackCanvas', 'feedback-qr.png');
+  });
+
+  /* ============ SETTINGS ============ */
+  function renderSettings(){
+    var s = state.settings;
+    document.getElementById('setBusinessName').value = s.businessName;
+    document.getElementById('setPrice').value = s.pricePerCup;
+    document.getElementById('setTarget').value = s.weeklyTarget;
+    document.getElementById('setDeliveryDay').value = s.deliveryDay;
+    document.getElementById('setCutoffDay').value = s.cutoffDay;
+    document.getElementById('setCutoffTime').value = s.cutoffTime;
+    document.getElementById('setDeliveryDate').value = s.currentDeliveryDate;
+  }
+  document.getElementById('btnSaveSettings').addEventListener('click', function(){
+    state.settings.businessName = document.getElementById('setBusinessName').value.trim() || 'Coffee Jelly Co.';
+    state.settings.pricePerCup = Number(document.getElementById('setPrice').value)||0;
+    state.settings.weeklyTarget = Number(document.getElementById('setTarget').value)||0;
+    state.settings.deliveryDay = document.getElementById('setDeliveryDay').value;
+    state.settings.cutoffDay = document.getElementById('setCutoffDay').value;
+    state.settings.cutoffTime = document.getElementById('setCutoffTime').value;
+    state.settings.currentDeliveryDate = document.getElementById('setDeliveryDate').value || state.settings.currentDeliveryDate;
+    save();
+    renderAll();
+    showToast('Settings saved.');
+  });
+
+  /* ============ DATA: BACKUP / EXPORT / RESTORE / CLEAR ============ */
+  document.getElementById('btnBackup').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    downloadBlob(blob, 'coffee-jelly-backup-' + isoDate(new Date()) + '.json');
+    showToast('Backup downloaded.');
+  });
+
+  document.getElementById('btnExportCsv').addEventListener('click', function(){
+    var headers = ['Customer Name','Contact','Cups','Price per Cup','Total','Payment Status','Fulfillment','Delivery Status','Order Date','Delivery Date','Notes'];
+    var lines = [headers.join(',')];
+    state.orders.forEach(function(o){
+      var row = [o.name,o.contact,o.cups,o.pricePerCup,o.total,o.paymentStatus,o.fulfillment,o.deliveryStatus,o.orderDate,o.deliveryDate,o.notes]
+        .map(function(v){ return csvEscape(v); });
+      lines.push(row.join(','));
+    });
+    var blob = new Blob([lines.join('\\n')], {type:'text/csv'});
+    downloadBlob(blob, 'coffee-jelly-orders-' + isoDate(new Date()) + '.csv');
+    showToast('Orders exported as CSV.');
+  });
+
+  function csvEscape(v){
+    v = (v===undefined||v===null) ? '' : String(v);
+    if(/[",\\n]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+    return v;
+  }
+
+  function downloadBlob(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  document.getElementById('restoreFile').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var parsed = JSON.parse(reader.result);
+        if(!parsed.settings || !parsed.orders){ throw new Error('Invalid backup file.'); }
+        if(confirm('This will replace your current data with the backup file. Continue?')){
+          state = parsed;
+          save();
+          renderAll();
+          showToast('Data restored from backup.');
+        }
+      }catch(err){
+        alert('Could not read this backup file. Please make sure it is a valid Coffee Jelly backup (.json).');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('confirmClear').addEventListener('change', function(){
+    document.getElementById('btnClearData').disabled = !this.checked;
+  });
+  document.getElementById('btnClearData').addEventListener('click', function(){
+    if(confirm('Are you absolutely sure? This will permanently delete all data.')){
+      localStorage.removeItem(STORAGE_KEY);
+      state = defaultState();
+      save();
+      document.getElementById('confirmClear').checked = false;
+      document.getElementById('btnClearData').disabled = true;
+      renderAll();
+      showToast('All data cleared.');
+    }
+  });
+
+  /* ============ MODALS ============ */
+  document.querySelectorAll('[data-close]').forEach(function(btn){
+    btn.addEventListener('click', function(){ closeModal(btn.dataset.close); });
+  });
+  document.querySelectorAll('.modal-backdrop').forEach(function(bd){
+    bd.addEventListener('click', function(e){ if(e.target === bd) closeModal(bd.id); });
+  });
+  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+  /* ============ HELPERS ============ */
+  function escapeHtml(str){
+    if(str===undefined||str===null) return '';
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function emptyState(emoji, text){
+    return '<div class="empty-state"><span class="emoji">'+emoji+'</span>'+text+'</div>';
+  }
+
+  /* ============ RENDER ALL ============ */
+  function renderAll(){
+    renderDashboard();
+    renderOrders();
+    renderProduction();
+    renderIngredients();
+    renderFeedback();
+    renderQr();
+    renderSettings();
+  }
+
+  /* ============ INIT ============ */
+  switchView('dashboard');
+  if(firebaseReady) loadCloudFeedback();
+  else renderSyncBanners();
+})();
+</script>
+</body>
+</html>
